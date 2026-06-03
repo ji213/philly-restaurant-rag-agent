@@ -1,2 +1,7 @@
+# Local Private Directories
 Data/
 Notes/
+
+# OS Specific Files
+.DS_Store
+Thumbs.db
