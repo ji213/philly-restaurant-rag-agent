@@ -29,13 +29,13 @@ def validate_first_100_businesses():
                 
                 biz = json.loads(line)
                 cats = biz.get("categories") or ""
-                location_state = biz.get('state') or ""
+                location_city = biz.get('city') or ""
 
                 #Simple bool flag to check if its a food/restaurant place
                 is_restaurant = any(keyword in cats for keyword in ["Restaurants", "Food", "Bars", "Eateries", "Cafes"])
-                is_new_york  = any(keyword in location_state for keyword in ["NY"])
+                is_philly  = any(keyword in location_city for keyword in ["Philadelphia"])
 
-                if is_restaurant and is_new_york:
+                if is_restaurant and is_philly:
                     restaurant_count += 1
                     print(f"🟢 [RECORD {idx}] RESTAURANT FOUND:")
                     print(f"   ID        : {biz.get('business_id')}")
