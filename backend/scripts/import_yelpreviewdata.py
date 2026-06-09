@@ -20,3 +20,36 @@ from openai import OpenAI
 ## Configure final version of functions used to clean/normalize import data
 ## import that file into this file once done
 ## generate test script to test effectiveness of process and load top 100 ( we can adapt our current process)
+
+
+""" 
+Process Outline 
+"""
+## 1- Ingest Data from file
+## 1a - process business data
+## prior to calling function establish business data file path, pass it into function
+## need to adapt the below logic to establish the path
+## maybe store data path in env file or something similar?
+## base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+## biz_path = os.path.join(base_dir, 'Data', 'yelp_academic_dataset_business.json')
+## 2- Process will go line by line through the file, normlaize payloads
+## 3 - as process goes, keep count of 'current_batch', once it gets to 1000, 
+## send to thread worker to process 
+"""
+If your pipeline encounters a network failure at row 340,000, 
+you don't want to restart from the beginning of the file. You can easily track this by writing a tiny local checkpoint.json file. 
+Each time a thread successfully completes a batch, it logs the last successfully parsed line number or file byte offset. When you re-run the main file, it reads the checkpoint file and uses an iterator skip to pick up right where it left off.
+"""
+## *** need logic to track errors into custom log file, we will create a directory
+## *** all of step 3 will be part of the batch process, which will run async
+## *** max 5 concurrent processes
+## 3a - Extract raw strings from the batch metadata
+## 3b - once batch is ingested, pass into embedding model text-embedding-3-small
+## 3c - take embedded matrix and attach payload to it, in format required by Pinecone
+## 3d - call Pinecone API and post into philly-restaurants namespace (offical name tbd)
+
+## 4 - track completed rows, and exit process once file is completely done
+## need to add logic after the main processing loop finishes that checks
+## if current_batch has items, submit them to the executor one last time before exiting
+
+
