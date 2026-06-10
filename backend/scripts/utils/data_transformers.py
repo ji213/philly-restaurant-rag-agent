@@ -126,3 +126,8 @@ def process_philly_restaurant_data(file_path: str) -> dict:
 
 
     return philly_restaurant_map
+
+def transform_review_to_payload(review_row: dict, business_map: dict, bid: int) -> dict:
+    """ 
+        Logic to append business metadata to review and estabish the payload
+    """

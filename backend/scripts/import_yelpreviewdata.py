@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 from pinecone import Pinecone
 from openai import OpenAI
+from utils.data_transformers import process_philly_restaurant_data
 
 
 ## Configure final version of functions used to clean/normalize import data
@@ -25,16 +26,7 @@ from openai import OpenAI
 """ 
 Process Outline 
 """
-## 1- Ingest Data from file
-## 1a - process business data
-## prior to calling function establish business data file path, pass it into function
-## need to adapt the below logic to establish the path
-## maybe store data path in env file or something similar?
-## base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-## biz_path = os.path.join(base_dir, 'Data', 'yelp_academic_dataset_business.json')
-## 2- Process will go line by line through the file, normlaize payloads
-## 3 - as process goes, keep count of 'current_batch', once it gets to 1000, 
-## send to thread worker to process 
+
 """
 If your pipeline encounters a network failure at row 340,000, 
 you don't want to restart from the beginning of the file. You can easily track this by writing a tiny local checkpoint.json file. 
@@ -51,5 +43,29 @@ Each time a thread successfully completes a batch, it logs the last successfully
 ## 4 - track completed rows, and exit process once file is completely done
 ## need to add logic after the main processing loop finishes that checks
 ## if current_batch has items, submit them to the executor one last time before exiting
+
+def main():
+    # build out path to business file
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    biz_path = os.path.join(base_dir, 'Data', 'yelp_academic_dataset_business.json')
+
+    # gather philly business data
+    # should I put a try exception as E block outside of this?
+
+    philly_restaurant_map = process_philly_restaurant_data(biz_path)
+
+    # loop through review file 1 by one
+    # normalize payloads
+    # append payload to current batch
+    # start processing when batch gets to 1000; send processing to thread once it is open
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    main()
 
 
