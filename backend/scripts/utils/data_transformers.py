@@ -127,7 +127,52 @@ def process_philly_restaurant_data(file_path: str) -> dict:
 
     return philly_restaurant_map
 
-def transform_review_to_payload(review_row: dict, business_map: dict, bid: int) -> dict:
+def transform_review_to_payload(review_row: dict, business_map: dict) -> dict:
     """ 
         Logic to append business metadata to review and estabish the payload
+
+        in prepare philly sample logic
+
+        Takes in review json and business dict and returns normalized payload
     """
+
+    normalized_payload = None
+
+    # if review row is empty, just return
+    if not review_row:
+        return
+
+    # grab business id 
+    bid = review_row.get("business_id")
+
+    # validate bid is in business map
+    if bid in business_map:
+        metadata = business_map[bid]
+
+        # Establish address components
+        display_address = f"{metadata['address']}, Philadelphia, PA {metadata['postalcode']}"
+
+        # Clean review text safely with a string fallback
+        clean_text = review_row.get("text", "").replace("\n", " ").strip()
+
+        normalized_payload = {
+            "id": review_row.get("review_id"),
+            "metadata": {
+                "business_id": bid,
+                "restaurant_name": metadata["name"],
+                "full_address": display_address,
+                "postal_code": metadata["postalcode"],
+                "latitude": metadata['latitude'],
+                "longitude": metadata['longitude'],
+                "review_stars": float(review_row.get("stars", 0)),
+                "stars_business": metadata["stars_business"],
+                "categories": metadata["categories"],
+                "features": metadata["features"],
+                "review_text": clean_text
+            }
+        }
+
+    
+    return normalized_payload
+
+

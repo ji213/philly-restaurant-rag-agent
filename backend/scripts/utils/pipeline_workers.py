@@ -72,8 +72,9 @@ def process_review_pipeline(business_map: dict, openai_client: OpenAI, index) ->
 
                         if bid in business_map:
                             # ... [Keep payload formatting structure from previous script] ...
-                            payload = transform_review_to_payload(rev, business_map, bid)
-                            current_batch.append(payload)
+                            payload = transform_review_to_payload(rev, business_map)
+                            if payload:
+                                current_batch.append(payload)
 
                             if len(current_batch) == BATCH_SIZE:
                                 # Block the main thread here if our 5 background slots are full

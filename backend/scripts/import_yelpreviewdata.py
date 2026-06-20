@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 from pinecone import Pinecone
 from openai import OpenAI
 from utils.data_transformers import process_philly_restaurant_data
+from utils.pipeline_workers import process_review_pipeline
 
 
 ## Configure final version of functions used to clean/normalize import data
@@ -51,7 +52,7 @@ def main():
 
     # gather philly business data
     # should I put a try exception as E block outside of this?
-
+    
     philly_restaurant_map = process_philly_restaurant_data(biz_path)
 
     # loop through review file 1 by one
