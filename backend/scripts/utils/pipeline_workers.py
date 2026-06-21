@@ -16,17 +16,24 @@ import threading
 def retry_operation(operation, max_retries=3, initial_delay=2):
     ## helper function to retry failures
 
+    if initial_delay <= 0:
+        initial_delay = 1
+
     delay = initial_delay
     for attempt in range(max_retries):
         try:
             return operation()
         except Exception as e:
             if attempt == max_retries - 1:
+                logging.error(f"❌ Operation permanently failed after {max_retries} attempts. Error details: {str(e)}")
                 raise e
 
             # what if initial delay is passed in as 0? default to 1
             jitter = random.uniform(0.5, 1.5)
             sleep_time = delay * jitter
+
+            logging.warning(f"⚠️ Operation failed on attempt {attempt + 1}. Retrying in {sleep_time:.2f} seconds...")
+
             time.sleep(sleep_time)
             delay *= 2
 
@@ -68,10 +75,11 @@ def process_and_upload_batch_worker(openai_client: OpenAI, index: Index, batch_d
         review_to_embed = [row["metadata"]["review_text"] for row in batch_data]
 
         # One batch call 
-        response = openai_client.embeddings.create(
+        response = retry_operation(
+            lambda: openai_client.embeddings.create(
             model="text-embedding-3-small",
             input=review_to_embed
-        )
+        ))
 
         # Map vector result from response back by positional index
         for index, row in enumerate(batch_data):
@@ -96,7 +104,9 @@ def process_and_upload_batch_worker(openai_client: OpenAI, index: Index, batch_d
 
             # push chunk
             try:
-                index.upsert(vectors=chunk, namespace=namespace)
+                retry_operation(
+                    lambda: index.upsert(vectors=chunk, namespace=namespace)
+                )
             except Exception as chunk_error:
                 with open(failure_log_path, "a", encoding="utf-8") as f:
                     f.write(f"--- Chunk Failure on lines {x} to {x+len(chunk)} ---\n{str(chunk_error)}\n\n")
