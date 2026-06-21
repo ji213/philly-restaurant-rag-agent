@@ -14,13 +14,12 @@ import threading
 def process_and_upload_batch_worker(openai_client: OpenAI, index: Index, batch_data, namespace, failure_log_path, semaphore):
     """
     Worker function executed inside background threads.
+
+    -- Ingest batch_data
+    -- embed batch_data with text embedding model
+    -- pass results in expected format into the pinecone vector db
     """
     # Work on payload generation before we do this
-
-    """
-    Simulated worker function to smoke-test multi-threaded execution boundaries,
-    batch slicing stability, and semaphore resource throttling.
-    """
 
     # Identify exactly which worker thread is executing this task
     thread_name = threading.current_thread().name
@@ -28,9 +27,47 @@ def process_and_upload_batch_worker(openai_client: OpenAI, index: Index, batch_d
     try:
         logging.info(f"▶️ [{thread_name}] Starting processing simulation for batch of size {len(batch_data)}...")
         
-        # 2. Simulate Network Latency (Time Complexity Simulation)
-        # We simulate a 1.5-second network roundtrip delay for embedding generation + DB upsert
-        # logging.info(f"⏳ [{thread_name}] Simulating embedding generation and Pinecone upsert latency...")
+        if not batch_data:
+            return
+
+
+        # embed batch of x payloads into open AI model
+        # The absolute technical limit is 2,048 input strings per API call.
+        # response payload will have matrix
+        #       -- index will match index of review from the input batch
+        # once we receive the results, generate pinecone_payload to be ingested by pinecone
+        # use as little API calls as possible to minimize cost
+
+        # list to assemble final payload for Pinecone
+        output_payload = []
+
+        # Extract just the review text strings
+        review_to_embed = [row["metadata"]["review_text"] for row in batch_data]
+
+        # One batch call 
+        response = openai_client.embeddings.create(
+            model="text-embedding-3-small",
+            input=review_to_embed
+        )
+
+        # Map vector result from response back by positional index
+        for index, row in enumerate(batch_data):
+            # extract the matching vector matrix
+            vector_matrix = response.data[index].embedding
+
+            # Structure the item exactly how Pinecone's client expects it
+            vector_item = {
+                "id": row["id"],
+                "values": vector_matrix,
+                "metadata": row["metadata"]
+            }
+
+            # append to result
+            output_payload.append(vector_item)
+
+
+        # exit function once we have processed successfully, log failures
+
         time.sleep(1.5)
         
         logging.info(f"✅ [{thread_name}] Batch transmission completed successfully.")
