@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import time
+import random
 from dotenv import load_dotenv
 from pinecone import Pinecone
 from pinecone import Index  # Import the class definition
@@ -9,6 +10,27 @@ from openai import OpenAI
 from concurrent.futures import ThreadPoolExecutor
 from utils.data_transformers import transform_review_to_payload
 import threading
+
+
+
+def retry_operation(operation, max_retries=3, initial_delay=2):
+    ## helper function to retry failures
+
+    delay = initial_delay
+    for attempt in range(max_retries):
+        try:
+            return operation()
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise e
+
+            # what if initial delay is passed in as 0? default to 1
+            jitter = random.uniform(0.5, 1.5)
+            sleep_time = delay * jitter
+            time.sleep(sleep_time)
+            delay *= 2
+
+            
 
 
 def process_and_upload_batch_worker(openai_client: OpenAI, index: Index, batch_data, namespace, failure_log_path, semaphore):
@@ -40,6 +62,7 @@ def process_and_upload_batch_worker(openai_client: OpenAI, index: Index, batch_d
 
         # list to assemble final payload for Pinecone
         output_payload = []
+        chunk_size = os.getenv("PINECONE_CHUNK_SIZE")
 
         # Extract just the review text strings
         review_to_embed = [row["metadata"]["review_text"] for row in batch_data]
@@ -64,17 +87,29 @@ def process_and_upload_batch_worker(openai_client: OpenAI, index: Index, batch_d
 
             # append to result
             output_payload.append(vector_item)
-
-
-        # exit function once we have processed successfully, log failures
-
-        time.sleep(1.5)
         
+        # now we have output_payload constructed, process into pinecone
+        logging.info(f"🚀 [{thread_name}] Transmitting vectors to Pinecone Index under namespace '{namespace}'...")
+
+        for x in range(0, len(output_payload), chunk_size):
+            chunk = output_payload[x: x + chunk_size]
+
+            # push chunk
+            try:
+                index.upsert(vectors=chunk, namespace=namespace)
+            except Exception as chunk_error:
+                with open(failure_log_path, "a", encoding="utf-8") as f:
+                    f.write(f"--- Chunk Failure on lines {x} to {x+len(chunk)} ---\n{str(chunk_error)}\n\n")
+
+
         logging.info(f"✅ [{thread_name}] Batch transmission completed successfully.")
 
     except Exception as worker_error:
         # Catch and trace any issues without crashing the main orchestrator thread
         logging.error(f"❌ [{thread_name}] Critical error during simulated worker execution: {str(worker_error)}")
+        with open(failure_log_path, "a", encoding="utf-8") as f:
+            f.write(f"--- Batch Failure Details ({thread_name}) ---\n")
+            f.write(f"Error: {str(worker_error)}\n\n")
         
     finally:
         # Releasing the semaphore inside the 'finally' block ensures that even if an exception 
