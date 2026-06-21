@@ -28,25 +28,9 @@ def process_and_upload_batch_worker(openai_client: OpenAI, index: Index, batch_d
     try:
         logging.info(f"▶️ [{thread_name}] Starting processing simulation for batch of size {len(batch_data)}...")
         
-        # 1. DSA Concept Validation: Inspecting the structural inputs
-        if len(batch_data) > 0:
-            first_row = batch_data[0]
-            # Safely pluck metadata properties for our trace log
-            review_id = first_row.get("id", "UNKNOWN_ID")
-            biz_name = first_row.get("metadata", {}).get("restaurant_name", "UNKNOWN_RESTAURANT")
-            
-            logging.info(
-                f"📊 [{thread_name}] Sample Head Record Details -> "
-                f"Target Namespace: '{namespace}' | "
-                f"First Review ID: {review_id} | "
-                f"Establishment: '{biz_name}'"
-            )
-        else:
-            logging.warning(f"⚠️ [{thread_name}] Received an unexpected empty batch.")
-
         # 2. Simulate Network Latency (Time Complexity Simulation)
         # We simulate a 1.5-second network roundtrip delay for embedding generation + DB upsert
-        logging.info(f"⏳ [{thread_name}] Simulating embedding generation and Pinecone upsert latency...")
+        # logging.info(f"⏳ [{thread_name}] Simulating embedding generation and Pinecone upsert latency...")
         time.sleep(1.5)
         
         logging.info(f"✅ [{thread_name}] Batch transmission completed successfully.")
@@ -56,7 +40,6 @@ def process_and_upload_batch_worker(openai_client: OpenAI, index: Index, batch_d
         logging.error(f"❌ [{thread_name}] Critical error during simulated worker execution: {str(worker_error)}")
         
     finally:
-        # 🧠 DSA Crucial Primitive: Safe Resource Release
         # Releasing the semaphore inside the 'finally' block ensures that even if an exception 
         # explodes above, this thread slot is unlocked, allowing the main loop to continue.
         semaphore.release()
