@@ -5,3 +5,18 @@ Notes/
 # OS Specific Files
 .DS_Store
 Thumbs.db
+
+# Environment Variables / Secrets
+backend/.env
+.env
+
+# Logs
+backend/logs/
+
+# Python Virtual Environments (added trailing slash)
+backend/venv/
+venv/
+
+# Python Cache (Crucial for scripts)
+**/__pycache__/
+*.pyc
