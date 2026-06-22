@@ -31,7 +31,7 @@ def retry_operation(operation, max_retries=3, initial_delay=2):
                 raise e
 
             # what if initial delay is passed in as 0? default to 1
-            jitter = random.uniform(0.5, 1.5)
+            jitter = random.uniform(1.0, 3.0)
             sleep_time = delay * jitter
 
             logging.warning(f"⚠️ Operation failed on attempt {attempt + 1}. Retrying in {sleep_time:.2f} seconds...")
@@ -51,6 +51,9 @@ def process_and_upload_batch_worker(openai_client: OpenAI, index: Index, batch_d
     -- pass results in expected format into the pinecone vector db
     """
     # Work on payload generation before we do this
+
+    # randomized delay to ease pipeline
+    time.sleep(random.uniform(0.1, 0.5))
 
     # Identify exactly which worker thread is executing this task
     thread_name = threading.current_thread().name
