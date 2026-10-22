@@ -20,7 +20,7 @@ python -m pip install --upgrade pip
 
 echo Installing backend dependencies...
 :: Core packages: fastapi (API), uvicorn (server), pinecone-client, openai, pandas (ETL), python-dotenv
-pip install fastapi uvicorn pinecone openai pandas pydantic python-dotenv
+pip install fastapi uvicorn pinecone openai pandas pydantic python-dotenv pydantic-settings
 
 :: Freeze dependencies to requirements.txt for tracking
 pip freeze > requirements.txt
