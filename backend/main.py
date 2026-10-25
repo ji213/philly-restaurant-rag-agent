@@ -78,7 +78,7 @@ def recommend_restaurants(payload: RecommendationRequest) -> RecommendationRespo
 
         #Package and return final response payload
         return RecommendationResponse(
-            query=payload.query.
+            query=payload.query,
             recommendation=synthesized_text,
             restaurants=restaurant_cards
         )
