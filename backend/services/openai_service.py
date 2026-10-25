@@ -82,14 +82,14 @@ def inputquery_to_vector(userquery: str) -> List[float]:
 
 
 
-def synthesize_response (userquery: str, RestaurantCards: List[RestaurantCard]) -> str:
+def synthesize_response (userquery: str, restaurantCards: List[RestaurantCard]) -> str:
     #function to synthesize response
     # inputs restaurant cards object and users input query
     # generates a tailored response using gpt-4o or or gpt-4o-mini
     ## client.chat.completions.create()
 
     # if we are missing any input parameters do not proceed
-    if not client or not userquery or not RestaurantCards:
+    if not client or not userquery or not restaurantCards:
         logger.error("ERROR! Missing input parameters for synthesization")
         return "Something went wrong. Please try again!"
 
@@ -100,7 +100,7 @@ def synthesize_response (userquery: str, RestaurantCards: List[RestaurantCard]) 
         f"Rating: {card.review_stars} stars\n"
         f"Categories: {', '.join(card.categories)}\n"
         f"Sample Review: {card.review_text}"
-        for card in RestaurantCards
+        for card in restaurantCards
     ])
 
     # send request to gpt-4o with retry logic
