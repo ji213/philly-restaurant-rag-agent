@@ -73,7 +73,7 @@ def recommend_restaurants(payload: RecommendationRequest) -> RecommendationRespo
         #Synthesize recommendation
         synthesized_text = synthesize_response(
             userquery=payload.query,
-            restaurant_cards=restaurant_cards
+            Restaurant_cards=restaurant_cards
         )
 
         #Package and return final response payload
