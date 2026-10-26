@@ -9,12 +9,12 @@ export default function App() {
   const [error, setError] = useState(null);
 
   const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!query.trim()) return;
+    e.preventDefault(); // Stops browser from refreshing the page on form submission
+    if (!query.trim()) return; // Do nothing on empty strings... should we return something to the UI here?
 
-    setLoading(true);
-    setError(null);
-    setResult(null);
+    setLoading(true); // Starts loading state
+    setError(null); //Clear out errors
+    setResult(null); // Clears out previous search results
 
     try {
       const response = await fetch('http://localhost:8000/api/recommend', {
@@ -24,20 +24,22 @@ export default function App() {
         },
         body: JSON.stringify({
           query: query.trim(),
-          postal_code: null, // Global semantic search as requested
+          postal_code: null, // Optional postal code input.... we will use this later
         }),
       });
-
+      // Throw error 
       if (!response.ok) {
         throw new Error(`Server error: ${response.statusText}`);
       }
 
+      // Parse the json response
       const data = await response.json();
-      setResult(data);
+      setResult(data); //Save the data into state, which triggers a UI re-render to display the results
     } catch (err) {
       console.error('Failed to fetch recommendations:', err);
       setError('Could not connect to the recommendation backend. Make sure your FastAPI server is running!');
     } finally {
+      //Always runs last (whether successful or failed): turns off the loading spinner
       setLoading(false);
     }
   };
@@ -62,10 +64,10 @@ export default function App() {
         {!result && !loading && (
           <div className="text-center my-auto space-y-4 max-w-lg">
             <h2 className="text-4xl font-extrabold tracking-tight text-white">
-              Where should we eat in Philly?
+              Philadelphia Food Recommendations
             </h2>
             <p className="text-slate-400 text-sm">
-              Ask for anything—cozy date night spots, authentic cheesesteaks, late-night bites, or specific cuisines.
+              Let me know what you are looking for today and I will see what I can find!
             </p>
           </div>
         )}
@@ -77,7 +79,7 @@ export default function App() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g., Best romantic Italian restaurants in Center City..."
+              placeholder="e.g., Best pizza in Philly..."
               className="w-full bg-slate-900 border border-slate-700/80 rounded-2xl py-4 pl-5 pr-14 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm md:text-base shadow-inner"
               disabled={loading}
             />
@@ -129,18 +131,18 @@ export default function App() {
                     >
                       <div>
                         <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-bold text-base text-white">{restaurant.name || 'Restaurant'}</h4>
-                          {restaurant.rating && (
+                          <h4 className="font-bold text-base text-white">{restaurant.restaurant_name || 'Restaurant'}</h4>
+                          {restaurant.review_stars && (
                             <span className="flex items-center space-x-1 bg-amber-500/10 text-amber-400 text-xs px-2 py-1 rounded-lg border border-amber-500/20">
                               <Star className="w-3.5 h-3.5 fill-amber-400" />
-                              <span>{restaurant.rating}</span>
+                              <span>{restaurant.review_stars}</span>
                             </span>
                           )}
                         </div>
-                        {restaurant.address && (
+                        {restaurant.full_address && (
                           <p className="flex items-center text-xs text-slate-400 mb-3">
                             <MapPin className="w-3.5 h-3.5 mr-1 text-slate-500 flex-shrink-0" />
-                            {restaurant.address}
+                            {restaurant.full_address}
                           </p>
                         )}
                         {restaurant.categories && (

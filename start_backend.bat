@@ -1,7 +1,7 @@
 @echo off
 echo Starting FastAPI Backend Pipeline...
 
-cd /d "%~dp0"
+cd /d "%~dp0backend"
 
 if not exist "venv" (
     echo Creating virtual environment 'venv'...
