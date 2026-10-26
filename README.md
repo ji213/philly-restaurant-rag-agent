@@ -42,6 +42,19 @@ data ingestion pipeline (import_yelpreviewdata.py) built to process and index ma
   writing schema mismatches or chunk delivery errors into localized `.log` streams.
 
 ------------------------------------------------------------------------
+🔮 PLANNED ENHANCEMENTS & ROADMAP
+------------------------------------------------------------------------
+
+The project is actively evolving from a single-query prototype into a full conversational AI platform. Planned upgrades include:
+
+* **Conversational Multi-Turn Session State:** Implementing in-memory chat session tracking in React to allow multi-turn dialogue, context-aware follow-up questions, and sliding-window memory management.
+* **Backend Contextual Synthesis:** Enhancing the FastAPI recommendation endpoint to accept conversation history payloads, enabling the LLM to resolve pronouns and contextual shifts dynamically.
+* **Location & Zip Code Inference:** Adding automated browser geolocation fallback alongside NLP-based neighborhood/zip code extraction from raw user prompts.
+* **Conversational UI Redesign:** Shifting to a modern, chat-centric layout with sticky input controls, streaming text animations, and quick-reply suggestion chips.
+* **Response Latency Optimizations:** Implementing server-side response streaming and vector embedding caching to significantly reduce end-to-end request latency.
+
+
+------------------------------------------------------------------------
 ⚙️ CONFIGURATION (.env)
 ------------------------------------------------------------------------
 
@@ -96,14 +109,3 @@ Run these two files using split terminals from your root directory with powershe
 (Launches the Vite React dev server on http://localhost:5173)
 
 
-------------------------------------------------------------------------
-🔮 PLANNED ENHANCEMENTS & ROADMAP
-------------------------------------------------------------------------
-
-The project is actively evolving from a single-query prototype into a full conversational AI platform. Planned upgrades include:
-
-* **Conversational Multi-Turn Session State:** Implementing in-memory chat session tracking in React to allow multi-turn dialogue, context-aware follow-up questions, and sliding-window memory management.
-* **Backend Contextual Synthesis:** Enhancing the FastAPI recommendation endpoint to accept conversation history payloads, enabling the LLM to resolve pronouns and contextual shifts dynamically.
-* **Location & Zip Code Inference:** Adding automated browser geolocation fallback alongside NLP-based neighborhood/zip code extraction from raw user prompts.
-* **Conversational UI Redesign:** Shifting to a modern, chat-centric layout with sticky input controls, streaming text animations, and quick-reply suggestion chips.
-* **Response Latency Optimizations:** Implementing server-side response streaming and vector embedding caching to significantly reduce end-to-end request latency.
